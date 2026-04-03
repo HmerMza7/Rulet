@@ -160,18 +160,7 @@ export default function RuletaPage() {
   const rotacionRef = useRef(0);
   const animFrameRef = useRef<number | null>(null);
 
-  const loadPersonas = (): Persona[] => {
-    if (typeof window === "undefined") return [];
-    try {
-      return cargarPersonas();
-    } catch {
-      return [];
-    }
-  };
-
-  const initialPersonas = loadPersonas();
-
-  const [personas, setPersonas] = useState<Persona[]>(() => initialPersonas);
+  const [personas, setPersonas] = useState<Persona[]>(() => cargarPersonas());
   const [girando, setGirando] = useState(false);
   const [seleccionado, setSeleccionado] = useState("");
   const [mensaje, setMensaje] = useState("");

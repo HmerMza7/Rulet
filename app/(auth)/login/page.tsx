@@ -10,26 +10,39 @@ type Persona = {
 
 const STORAGE_KEY = "personas_form_data";
 
+const defaultPersonas: Persona[] = [
+  { nombre: "", sexo: "" },
+  { nombre: "", sexo: "" },
+];
+
+const getInitialPersonas = (): Persona[] => {
+  if (typeof window === "undefined") {
+    return defaultPersonas;
+  }
+
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : defaultPersonas;
+  } catch {
+    return defaultPersonas;
+  }
+};
+
 const Page = () => {
   const router = useRouter();
-  const [personas, setPersonas] = useState<Persona[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved
-      ? JSON.parse(saved)
-      : [
-          { nombre: "", sexo: "" },
-          { nombre: "", sexo: "" },
-        ];
-  });
+
+  const [personas, setPersonas] = useState<Persona[]>(getInitialPersonas);
 
   const updatePersona = (
     index: number,
     field: keyof Persona,
     value: string,
   ) => {
-    const updated = [...personas];
-    updated[index][field] = value;
-    setPersonas(updated);
+    setPersonas((prev) =>
+      prev.map((persona, i) =>
+        i === index ? { ...persona, [field]: value } : persona,
+      ),
+    );
   };
 
   const handleSave = () => {
@@ -42,10 +55,10 @@ const Page = () => {
       <div className="w-full max-w-2xl rounded-3xl bg-[#27272A] shadow-2xl p-8 border border-zinc-800">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-[#10B981]">
-            Ruleta de la pasion
+            Ruleta de la pasión
           </h1>
           <p className="text-zinc-400 mt-2">
-            Ingresa los nombres de los participantes que daran rienda suelta a
+            Ingresa los nombres de los participantes que darán rienda suelta a
             sus deseos.
           </p>
         </div>
