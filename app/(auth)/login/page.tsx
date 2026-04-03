@@ -1,83 +1,102 @@
-import React from "react";
-import ToggleTheme from "@/components/ToggleTheme";
-import Image from "next/image";
+"use client";
 
-const page = () => {
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+type Persona = {
+  nombre: string;
+  sexo: string;
+};
+
+const STORAGE_KEY = "personas_form_data";
+
+const Page = () => {
+  const router = useRouter();
+  const [personas, setPersonas] = useState<Persona[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved
+      ? JSON.parse(saved)
+      : [
+          { nombre: "", sexo: "" },
+          { nombre: "", sexo: "" },
+        ];
+  });
+
+  const updatePersona = (
+    index: number,
+    field: keyof Persona,
+    value: string,
+  ) => {
+    const updated = [...personas];
+    updated[index][field] = value;
+    setPersonas(updated);
+  };
+
+  const handleSave = () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(personas));
+    router.push("/home");
+  };
+
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          background:
-            "radial-gradient(125% 125% at 50% 10%, var(--background) 40%, var(--accent-glow) 100%)",
-        }}
-      />
-      <div className="flex min-h-screen flex-col items-center justify-center font-sans relative z-11">
-        <main className="flex w-full max-w-3xl flex-col items-center justify-between gap-12 px-16 py-20 sm:items-start">
-          <Image
-            className="dark:invert"
-            src="/next.svg"
-            alt="Next.js logo"
-            width={100}
-            height={20}
-            priority
-          />
+    <div className="min-h-screen bg-[#09090B] flex items-center justify-center p-6">
+      <div className="w-full max-w-2xl rounded-3xl bg-[#27272A] shadow-2xl p-8 border border-zinc-800">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-[#10B981]">
+            Ruleta de la pasion
+          </h1>
+          <p className="text-zinc-400 mt-2">
+            Ingresa los nombres de los participantes que daran rienda suelta a
+            sus deseos.
+          </p>
+        </div>
 
-          <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-            <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-foreground">
-              To get started, edit the page.tsx file.
-            </h1>
-
-            <p className="max-w-md text-lg leading-8 text-muted">
-              Looking for a starting point or more instructions? Head over to{" "}
-              <a
-                href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                className="font-medium text-primary"
-              >
-                Templates
-              </a>{" "}
-              or the{" "}
-              <a
-                href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                className="font-medium text-primary"
-              >
-                Learning
-              </a>{" "}
-              center.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-            <a
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 text-white transition-colors hover:bg-emerald-600 md:w-[158px]"
-              href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
+        <div className="space-y-6">
+          {personas.map((persona, index) => (
+            <div
+              key={index}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl bg-[#18181B] p-5"
             >
-              <Image
-                className="dark:invert"
-                src="/vercel.svg"
-                alt="Vercel logomark"
-                width={16}
-                height={16}
-              />
-              Deploy Now
-            </a>
+              <div>
+                <label className="block text-sm text-zinc-300 mb-2">
+                  Nombre persona {index + 1}
+                </label>
+                <input
+                  type="text"
+                  value={persona.nombre}
+                  onChange={(e) =>
+                    updatePersona(index, "nombre", e.target.value)
+                  }
+                  placeholder={`Nombre ${index + 1}`}
+                  className="w-full rounded-xl border border-zinc-700 bg-[#27272A] px-4 py-3 text-white outline-none focus:border-[#10B981]"
+                />
+              </div>
 
-            <a
-              className="flex h-12 w-full items-center justify-center rounded-full border border-emerald-500/30 px-5 text-primary transition-colors hover:bg-emerald-500/10 md:w-[158px]"
-              href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Documentation
-            </a>
-            <ToggleTheme />
-          </div>
-        </main>
+              <div>
+                <label className="block text-sm text-zinc-300 mb-2">Sexo</label>
+                <select
+                  value={persona.sexo}
+                  onChange={(e) => updatePersona(index, "sexo", e.target.value)}
+                  className="w-full rounded-xl border border-zinc-700 bg-[#27272A] px-4 py-3 text-white outline-none focus:border-[#10B981]"
+                >
+                  <option value="">Selecciona</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="femenino">Femenino</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+            </div>
+          ))}
+
+          <button
+            onClick={handleSave}
+            className="w-full rounded-2xl bg-[#10B981] py-3 font-semibold text-black transition hover:opacity-90"
+          >
+            Continuar
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default page;
+export default Page;
